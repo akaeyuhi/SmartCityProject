@@ -54,7 +54,7 @@ class FileDatasource:
                 latitude=float(gps_data[1]),
             )
             parking = Parking(
-                empty_count=int(parking_data[0]),
+                empty_count=int(float(parking_data[0])),
                 gps=gps
             )
 
@@ -62,7 +62,7 @@ class FileDatasource:
                 "aggregated_data": AggregatedData(
                     accelerometer=accelerometer,
                     gps=gps,
-                    time=datetime.now(),
+                    timestamp=datetime.now(),
                     user_id=config.USER_ID,
                 ),
                 "parking_data": parking

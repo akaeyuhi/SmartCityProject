@@ -28,7 +28,7 @@ def publish(client, topic_aggregated, topic_parking, datasource, delay):
     while True:
         time.sleep(delay)
         data_batch = datasource.read()
-        if data is None:
+        if data_batch is None:
             continue
 
         for data in data_batch:
