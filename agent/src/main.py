@@ -27,20 +27,22 @@ def publish(client, topic_aggregated, topic_parking, datasource, delay):
     datasource.startReading()
     while True:
         time.sleep(delay)
-        data = datasource.read()
+        data_batch = datasource.read()
         if data is None:
             continue
 
-        aggregated_msg = AggregatedDataSchema().dumps(data["aggregated_data"])
-        parking_msg = ParkingSchema().dumps(data["parking_data"])
+        for data in data_batch:
 
-        result1 = client.publish(topic_aggregated, aggregated_msg)
-        result2 = client.publish(topic_parking, parking_msg)
+            aggregated_msg = AggregatedDataSchema().dumps(data["aggregated_data"])
+            parking_msg = ParkingSchema().dumps(data["parking_data"])
 
-        if result1[0] != 0:
-            print(f"Failed to send aggregated data to topic {topic_aggregated}")
-        if result2[0] != 0:
-            print(f"Failed to send parking data to topic {topic_parking}")
+            result1 = client.publish(topic_aggregated, aggregated_msg)
+            result2 = client.publish(topic_parking, parking_msg)
+
+            if result1[0] != 0:
+                print(f"Failed to send aggregated data to topic {topic_aggregated}")
+            if result2[0] != 0:
+                print(f"Failed to send parking data to topic {topic_parking}")
 
 def run():
     # Prepare mqtt client
