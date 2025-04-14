@@ -1,5 +1,6 @@
 import asyncio
 import os
+import csv
 from kivy.app import App
 from kivy_garden.mapview import MapMarker, MapView
 from kivy.clock import Clock
@@ -21,12 +22,36 @@ class MapViewApp(App):
         self.pothole_icon = image_path("pothole.png")
         self.bump_icon = image_path("bump.png")
 
+    def load_from_csv(self, filename="data.csv"):
+        try:
+            with open(filename, newline="") as csvfile:
+                reader = csv.DictReader(csvfile)
+                for row in reader:
+                    try:
+                        lat = float(row["y"])
+                        lon = float(row["x"])
+                        point = (lat, lon)
+
+                        self.line_layer.add_point(point)
+                        self.set_generic_marker(point)  # Для прикладу позначимо "невідомий" стан
+                    except (ValueError, KeyError):
+                        continue
+            print("CSV loaded successfully.")
+        except FileNotFoundError:
+            print(f"CSV файл {filename} не знайдено.")
+
+    def set_generic_marker(self, point):
+        lat, lon = point
+        marker = MapMarker(lat=lat, lon=lon, source=self.bump_icon)  # або можна зробити окремий значок
+        self.mapview.add_marker(marker)
+
     def build(self):
         self.mapview = MapView(zoom=15, lat=50.4501, lon=30.5234)
         self.mapview.add_layer(self.line_layer, mode="scatter")
         return self.mapview
 
     def on_start(self):
+        self.load_from_csv()
         Clock.schedule_interval(self.update, 2) 
 
     def update(self, *args):
