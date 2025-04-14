@@ -1,4 +1,5 @@
 import asyncio
+import os
 from kivy.app import App
 from kivy_garden.mapview import MapMarker, MapView
 from kivy.clock import Clock
@@ -8,45 +9,55 @@ from datasource import Datasource
 
 class MapViewApp(App):
     def __init__(self, **kwargs):
-        super().__init__()
-        # додати необхідні змінні
+        super().__init__(**kwargs)
+        self.mapview = None
+        self.datasource = Datasource(user_id=1)
+        self.line_layer = LineMapLayer(color=[0, 0.6, 0.9, 1], width=2)
+        self.car_marker = None
 
-    def on_start(self):
-        """
-        Встановлює необхідні маркери, викликає функцію для оновлення мапи
-        """
-
-    def update(self, *args):
-        """
-        Викликається регулярно для оновлення мапи
-        """
-
-
-    def update_car_marker(self, point):
-        """
-        Оновлює відображення маркера машини на мапі
-        :param point: GPS координати
-        """
-
-    def set_pothole_marker(self, point):
-        """
-        Встановлює маркер для ями
-        :param point: GPS координати
-        """
-
-    def set_bump_marker(self, point):
-        """
-        Встановлює маркер для лежачого поліцейського
-        :param point: GPS координати
-        """
+        base_dir = os.path.dirname(__file__)
+        image_path = lambda name: os.path.join(base_dir, "images", name)
+        self.car_icon = image_path("car.png")
+        self.pothole_icon = image_path("pothole.png")
+        self.bump_icon = image_path("bump.png")
 
     def build(self):
-        """
-        Ініціалізує мапу MapView(zoom, lat, lon)
-        :return: мапу
-        """
-        self.mapview = MapView()
+        self.mapview = MapView(zoom=15, lat=50.4501, lon=30.5234)
+        self.mapview.add_layer(self.line_layer, mode="scatter")
         return self.mapview
+
+    def on_start(self):
+        Clock.schedule_interval(self.update, 2) 
+
+    def update(self, *args):
+        new_points = self.datasource.get_new_points()
+        for lat, lon, road_state in new_points:
+            self.line_layer.add_point((lat, lon))
+            self.update_car_marker((lat, lon))
+
+            if road_state == "hole":
+                self.set_pothole_marker((lat, lon))
+            elif road_state == "bump":
+                self.set_bump_marker((lat, lon))
+
+    def update_car_marker(self, point):
+        lat, lon = point
+        if self.car_marker is None:
+            self.car_marker = MapMarker(lat=lat, lon=lon, source=self.car_icon)
+            self.mapview.add_marker(self.car_marker)
+        else:
+            self.car_marker.lat = lat
+            self.car_marker.lon = lon
+
+    def set_pothole_marker(self, point):
+        lat, lon = point
+        marker = MapMarker(lat=lat, lon=lon, source=self.pothole_icon)
+        self.mapview.add_marker(marker)
+
+    def set_bump_marker(self, point):
+        lat, lon = point
+        marker = MapMarker(lat=lat, lon=lon, source=self.bump_icon)
+        self.mapview.add_marker(marker)
 
 
 if __name__ == "__main__":
