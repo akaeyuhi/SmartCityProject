@@ -177,13 +177,22 @@ def update_processed_agent_data(processed_agent_data_id: int, data: ProcessedAge
 @app.delete("/processed_agent_data/{processed_agent_data_id}", response_model=ProcessedAgentDataInDB)
 def delete_processed_agent_data(processed_agent_data_id: int):
     db = SessionLocal()
-    stmt = delete(processed_agent_data).where(processed_agent_data.c.id == processed_agent_data_id).returning(processed_agent_data.c.id)
-    result = db.execute(stmt).scalar()
+
+    stmt_select = select(processed_agent_data).where(processed_agent_data.c.id == processed_agent_data_id)
+    result = db.execute(stmt_select).fetchone()
+
+    if not result:
+        db.close()
+        raise HTTPException(status_code=404, detail="Data not found")
+
+    deleted_data = dict(zip(processed_agent_data.columns.keys(), result))
+
+    stmt_delete = delete(processed_agent_data).where(processed_agent_data.c.id == processed_agent_data_id).returning(processed_agent_data.c.id)
+    result = db.execute(stmt_delete).scalar()
     db.commit()
     db.close()
-    if not result:
-        raise HTTPException(status_code=404, detail="Data not found")
-    return {"message": f"Deleted record {processed_agent_data_id}"}
+
+    return deleted_data
 
 if __name__ == "__main__":
     import uvicorn
