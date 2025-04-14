@@ -21,4 +21,15 @@ class StoreApiAdapter(StoreGateway):
         Returns:
             bool: True if the data is successfully saved, False otherwise.
         """
-        # Implement it
+        try:
+            url = f"{self.api_base_url}/processed_agent_data"
+            payload = [data.model_dump() for data in processed_agent_data_batch]
+
+            response = requests.post(url, json=payload, timeout=5)
+            response.raise_for_status()
+
+            logging.info(f"Successfully saved {len(payload)} records to {url}")
+            return True
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to save data to store API: {e}")
+            return False
