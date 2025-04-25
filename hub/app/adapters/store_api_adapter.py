@@ -21,15 +21,22 @@ class StoreApiAdapter(StoreGateway):
         Returns:
             bool: True if the data is successfully saved, False otherwise.
         """
+        url = f"{self.api_base_url}/processed_agent_data/"
+
+        headers = {'Content-Type': 'application/json'}
+
+        data = []
+        for processed_agent_data in processed_agent_data_batch:
+            timestamp = processed_agent_data.agent_data.timestamp.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+            processed_agent_data.agent_data.timestamp = timestamp
+            data.append(processed_agent_data.dict())
+
         try:
-            url = f"{self.api_base_url}/processed_agent_data"
-            payload = [data.model_dump() for data in processed_agent_data_batch]
-
-            response = requests.post(url, json=payload, timeout=5)
-            response.raise_for_status()
-
-            logging.info(f"Successfully saved {len(payload)} records to {url}")
-            return True
-        except requests.exceptions.RequestException as e:
-            logging.error(f"Failed to save data to store API: {e}")
+            with requests.post(url, data=json.dumps(data), headers=headers) as response:
+                if response.status_code != 200:
+                    logging.error(f"Invalid Hub response\nData: {data}\nResponse: {response}")
+                    return False
+        except Exception as e:
+            logging.error(f"Error occurred during request: {e}")
             return False
+        return True
