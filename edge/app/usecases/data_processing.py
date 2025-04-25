@@ -12,22 +12,6 @@ def process_agent_data(
     Returns:
         processed_data_batch (ProcessedAgentData): Processed data containing the classified state of the road surface and agent data.
     """
-    raw_z  = agent_data.accelerometer.z
-    g_z = raw_z / 16384
-    abs_g_z = abs(g_z)
+    data_to_process = ProcessedAgentData(road_state='unknown', agent_data=agent_data)
 
-    if abs_g_z < 1.5:
-        road_state = "normal"
-    elif 1.5 <= abs_g_z < 3.0:
-        road_state = "bump"
-    elif abs_g_z >= 3.0:
-        road_state = "hole"
-    else:
-        road_state = "unknown"
-
-    # print(f"Detected: {road_state} | Raw Z: {raw_z} | g-force: {g_z:.2f}")
-
-    return ProcessedAgentData(
-        road_state=road_state,
-        agent_data=agent_data
-    )
+    return data_to_process
