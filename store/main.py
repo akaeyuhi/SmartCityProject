@@ -28,7 +28,8 @@ DATABASE_URL = (
     f"{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 )
 engine = create_engine(DATABASE_URL)
-metadata = MetaData(bind=engine)
+metadata = MetaData()
+metadata.bind = engine
 
 processed_agent_data = Table(
     "processed_agent_data",
@@ -45,6 +46,7 @@ processed_agent_data = Table(
     Column("temperature", Float),
     Column("temp_unit", String),
     Column("humidity", Float),
+    Column("humidity_unit", String),
     Column("illumination", Float),
     Column("pm2_5", Float),
     Column("pm10", Float),
@@ -86,6 +88,9 @@ class AirQualityData(BaseModel):
     aqi: int
 
 class VibrationData(AccelerometerData): 
+    x: float
+    y: float
+    z: float
     magnitude: float | None
 
 class AgentData(BaseModel):
@@ -263,7 +268,7 @@ def update_processed_agent_data(item_id: int, data: ProcessedAgentDataIn):
             temperature=vals.temperature.value,
             temp_unit=vals.temperature.unit,
             humidity=vals.humidity.value,
-            humidity_unit=vals.humidity.unit,
+            humid_unit=vals.humidity.unit,
             illumination=vals.light.illumination,
             pm2_5=vals.air_quality.pm2_5,
             pm10=vals.air_quality.pm10,
