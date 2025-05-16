@@ -73,9 +73,10 @@ def process_agent_data(agent_data_batch: List[AgentData]):
         if i in potholes_indices:
             road_state = "pothole"
 
-        processed_data_batch.append(
-            ProcessedAgentData(road_state=road_state, agent_data=val)
-        )
+        processed_data = agent_data_batch[i]
+        processed_data.road_state = road_state
+
+        processed_data_batch.append(processed_data)
     
     return processed_data_batch
 

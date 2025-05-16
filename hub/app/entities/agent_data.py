@@ -1,7 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, field_validator
 
-
 class AccelerometerData(BaseModel):
     x: float
     y: float
@@ -13,16 +12,54 @@ class GpsData(BaseModel):
     longitude: float
 
 
+class TemperatureData(BaseModel):
+    value: float
+    unit: str
+
+
+class HumidityData(BaseModel):
+    value: float
+    unit: str
+
+
+class VibrationData(BaseModel):
+    x: float
+    y: float
+    z: float
+    magnitude: float | None = None
+
+    @field_validator('magnitude', mode='after')
+    def compute_magnitude(cls, v, values):
+        x = values.get('x', 0)
+        y = values.get('y', 0)
+        z = values.get('z', 0)
+        return (x**2 + y**2 + z**2) ** 0.5
+
+
+class LightData(BaseModel):
+    illumination: float
+
+
+class AirQualityData(BaseModel):
+    pm2_5: float
+    pm10: float
+    aqi: int | None = None
+
+
 class AgentData(BaseModel):
     user_id: int
     accelerometer: AccelerometerData
     gps: GpsData
+    temperature: TemperatureData
+    humidity: HumidityData
+    vibration: VibrationData
+    light: LightData
+    air_quality: AirQualityData
     timestamp: datetime
 
     @classmethod
-    @field_validator('timestamp', mode='before')
+    @field_validator("timestamp", mode="before")
     def parse_timestamp(cls, value):
-        # Convert the timestamp to a datetime object
         if isinstance(value, datetime):
             return value
         try:
