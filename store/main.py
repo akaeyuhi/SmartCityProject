@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import Set, List
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import (
     create_engine, MetaData, Table, Column,
     Integer, String, Float, DateTime
@@ -150,10 +151,18 @@ class ProcessedAgentDataOut(BaseModel):
     air_quality_status: str
     timestamp: datetime
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],           # дозволяємо всі походження
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
+
 # WebSocket subscriptions
 subscriptions: Set[WebSocket] = set()
 
-@app.websocket("/ws/")
+@app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     subscriptions.add(websocket)
