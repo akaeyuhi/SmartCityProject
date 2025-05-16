@@ -6,10 +6,10 @@ interface Props { data: SensorPayload[]; }
 
 const SensorChart: React.FC<Props> = ({ data }) => {
   const chartData = data.map(d => ({
-    time: new Date(d.timestamp).toLocaleTimeString(),
-    temp: d.temperature.value,
-    vib: d.vibration.magnitude,
-    aqi: d.air_quality.aqi,
+    time: new Date(d.agent_data.timestamp).toLocaleTimeString(),
+    temp: d.agent_data.temperature.value,
+    vib: d.agent_data.vibration.magnitude,
+    aqi: d.agent_data.air_quality.aqi,
   })).reverse();
 
   return (
