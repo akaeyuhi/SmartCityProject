@@ -4,7 +4,13 @@ from domain.accelerometer import Accelerometer
 from domain.gps import Gps
 from domain.parking import Parking
 from domain.aggregated_data import AggregatedData
+from domain.temperature import Temperature
+from domain.humidity import Humidity
+from domain.vibration import Vibration
+from domain.light import Light
+from domain.air_quality import AirQuality
 import config
+import random
 
 class FileDatasource:
     def __init__(
@@ -69,6 +75,12 @@ class FileDatasource:
             self.accel_line += 1
             self.parking_line += 1
 
+        data.temperature = self._generate_temperature()
+        data.humidity = self._generate_humidity()
+        data.vibration = self._generate_vibration()
+        data.light = self._generate_light()
+        data.air_quality = self._generate_air_quality()
+
         return data
 
     def startReading(self, *args, **kwargs):
@@ -81,3 +93,28 @@ class FileDatasource:
     def stopReading(self, *args, **kwargs):
         """Метод повинен викликатись для закінчення читання даних"""
         self.reading = False
+
+    # Генератори випадкових даних
+    def _generate_temperature(self) -> Temperature:
+        value = round(random.uniform(-10.0, 40.0), 2)
+        return Temperature(value=value, unit="C")
+
+    def _generate_humidity(self) -> Humidity:
+        value = round(random.uniform(0.0, 100.0), 2)
+        return Humidity(value=value, unit="%")
+
+    def _generate_vibration(self) -> Vibration:
+        x = round(random.uniform(-5.0, 5.0), 3)
+        y = round(random.uniform(-5.0, 5.0), 3)
+        z = round(random.uniform(-5.0, 5.0), 3)
+        return Vibration(x=x, y=y, z=z)
+
+    def _generate_light(self) -> Light:
+        illum = round(random.uniform(0.0, 2000.0), 1)
+        return Light(illumination=illum)
+
+    def _generate_air_quality(self) -> AirQuality:
+        pm2_5 = round(random.uniform(0.0, 500.0), 1)
+        pm10 = round(random.uniform(0.0, 600.0), 1)
+        aqi = random.randint(0, 300)
+        return AirQuality(pm2_5=pm2_5, pm10=pm10, aqi=aqi)
