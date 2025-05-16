@@ -125,6 +125,19 @@ services:
      networks:
        mqtt_network:
 
+  frontend:
+    container_name: frontend
+    build: ../../road-vision-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - mqtt
+      - edge
+    networks:
+      - mqtt_network
+      - edge_hub
+
+
 networks:
   mqtt_network:
   db_network:
