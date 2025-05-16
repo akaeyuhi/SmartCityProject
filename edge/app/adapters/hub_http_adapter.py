@@ -2,7 +2,7 @@ import logging
 
 import requests as requests
 
-from app.entities.agent_data import AgentData
+from app.entities.processed_agent_data import ProcessedAgentData
 from app.interfaces.hub_gateway import HubGateway
 
 
@@ -10,7 +10,7 @@ class HubHttpAdapter(HubGateway):
     def __init__(self, api_base_url):
         self.api_base_url = api_base_url
 
-    def save_data(self, data: AgentData):
+    def save_data(self, data: ProcessedAgentData):
         """
         Save the road data to the Hub.
         Parameters:

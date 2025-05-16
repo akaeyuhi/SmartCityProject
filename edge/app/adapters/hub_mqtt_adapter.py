@@ -3,7 +3,7 @@ import logging
 import requests as requests
 from paho.mqtt import client as mqtt_client
 
-from app.entities.agent_data import AgentData
+from app.entities.processed_agent_data import ProcessedAgentData
 from app.interfaces.hub_gateway import HubGateway
 
 
@@ -14,7 +14,7 @@ class HubMqttAdapter(HubGateway):
         self.topic = topic
         self.mqtt_client = self._connect_mqtt(broker, port)
 
-    def save_data(self, data: AgentData):
+    def save_data(self, data: ProcessedAgentData):
         """
         Save the road data to the Hub.
         Parameters:
