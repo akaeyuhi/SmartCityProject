@@ -1,8 +1,13 @@
 from app.entities.agent_data import AgentData
 from app.entities.processed_agent_data import ProcessedAgentData
 
+BUMP_THRESHOLD = 7000    # Z > 7000 ⇒ bump
+POTHOLE_THRESHOLD = -7000  # Z < -7000 ⇒ pothole
 
-def process_agent_data(agent_data: AgentData) -> ProcessedAgentData:
+
+def process_agent_data(agent_data: AgentData, 
+                       bump_threshold: float = BUMP_THRESHOLD, 
+                       pothole_threshold: float = POTHOLE_THRESHOLD) -> ProcessedAgentData:
     """
     Process all sensors and classify their status along with road_state.
     """
@@ -50,9 +55,18 @@ def process_agent_data(agent_data: AgentData) -> ProcessedAgentData:
     else:
         aq_stat = 'poor'
 
+    z = agent_data.accelerometer.z
+
+    if z > bump_threshold:
+        road_state = "bump"
+    elif z < pothole_threshold:
+        road_state = "pothole"
+    else:
+        road_state = "normal"
+
     return ProcessedAgentData(
         agent_data=agent_data,
-        road_state='unknown',
+        road_state=road_state,
         temp_status=temp_stat,
         humidity_status=hum_stat,
         vibration_status=vibration_road,
