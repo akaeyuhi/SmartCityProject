@@ -23,26 +23,19 @@ def connect_mqtt(broker, port):
     client.loop_start()
     return client
 
-def publish(client, topic_aggregated, topic_parking, datasource, delay):
+def publish(client, topic, datasource, delay):
     datasource.startReading()
     while True:
         time.sleep(delay)
-        data_batch = datasource.read()
-        if data_batch is None:
-            continue
-
-        for data in data_batch:
-
-            aggregated_msg = AggregatedDataSchema().dumps(data["aggregated_data"])
-            parking_msg = ParkingSchema().dumps(data["parking_data"])
-
-            result1 = client.publish(topic_aggregated, aggregated_msg)
-            result2 = client.publish(topic_parking, parking_msg)
-
-            if result1[0] != 0:
-                print(f"Failed to send aggregated data to topic {topic_aggregated}")
-            if result2[0] != 0:
-                print(f"Failed to send parking data to topic {topic_parking}")
+        data = datasource.read()
+        msg = AggregatedDataSchema().dumps(data)
+        result = client.publish(topic, msg)
+        status = result[0]
+        if status == 0:
+            pass
+            # print(f"Send `{msg}` to topic `{topic}`")
+        else:
+            print(f"Failed to send message to topic {topic}")
 
 def run():
     # Prepare mqtt client
@@ -52,7 +45,7 @@ def run():
     datasource = FileDatasource("data/accelerometer.csv", "data/gps.csv", "data/parking.csv")
 
     # Infinity publish data into two topics
-    publish(client, config.MQTT_TOPIC, config.MQTT_PARKING_TOPIC, datasource, config.DELAY)
+    publish(client, config.MQTT_TOPIC, datasource, config.DELAY)
 
 if __name__ == "__main__":
     run()

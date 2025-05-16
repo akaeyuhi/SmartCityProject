@@ -2,75 +2,82 @@ from csv import reader
 from datetime import datetime
 from domain.accelerometer import Accelerometer
 from domain.gps import Gps
-from domain.aggregated_data import AggregatedData
 from domain.parking import Parking
+from domain.aggregated_data import AggregatedData
 import config
-import random
 
 class FileDatasource:
-    def __init__(self, accelerometer_filename: str, gps_filename: str, parking_filename: str) -> None:
-        self.accelerometer_filename = accelerometer_filename
+    def __init__(
+        self,
+        accelerometer_filename: str,
+        gps_filename: str,
+        parking_filename: str,
+    ) -> None:
+        self.accel_filename = accelerometer_filename
         self.gps_filename = gps_filename
         self.parking_filename = parking_filename
-        self.batch_size = 7
-        self.files = {"accel": None, "gps": None, "parking": None}
-        self.readers = {"accel": None, "gps": None, "parking": None}
 
-    def startReading(self):
-        self.files["accel"] = open(self.accelerometer_filename, "r")
-        self.files["gps"] = open(self.gps_filename, "r")
-        self.files["parking"] = open(self.parking_filename, "r")
+        with open(self.gps_filename) as file:
+            lines = [line.rstrip() for line in file]
+            lines = lines[1:]
+            self.gps_lines = lines
 
-        self.readers["accel"] = reader(self.files["accel"])
-        self.readers["gps"] = reader(self.files["gps"])
-        self.readers["parking"] = reader(self.files["parking"])
+        with open(self.accel_filename) as file:
+            lines = [line.rstrip() for line in file]
+            lines = lines[1:]
+            self.accel_lines = lines
 
-        next(self.readers["accel"], None)
-        next(self.readers["gps"], None)
-        next(self.readers["parking"], None)
+        with open(self.parking_filename) as file:
+            lines = [line.rstrip() for line in file]
+            lines = lines[1:]
+            self.parking_lines = lines
 
-    def _read_next(self, reader, file_key):
-        try:
-            return next(reader)
-        except StopIteration:
-            self.files[file_key].seek(0)
-            next(reader, None)
-            return next(reader)
+    def read(self) -> AggregatedData:
+        """Метод повертає дані отримані з датчиків"""
+        data = AggregatedData(
+            Accelerometer(1, 2, 3),
+            Gps(4, 5),
+            Parking(25, Gps(4, 5)),
+            datetime.now(),
+            config.USER_ID,
+        )
 
-    def read(self):
-        data_list = []
-        for _ in range(self.batch_size):
-            accel_data = self._read_next(self.readers["accel"], "accel")
-            gps_data = self._read_next(self.readers["gps"], "gps")
-            parking_data = self._read_next(self.readers["parking"], "parking")
+        if self.reading == True:
+            if self.gps_line > len(self.gps_lines) - 1:
+                self.gps_line = 0
 
-            accelerometer = Accelerometer(
-                x=int(accel_data[0]),
-                y=int(accel_data[1]),
-                z=int(accel_data[2]),
-            )
-            gps = Gps(
-                longitude=float(gps_data[0]),
-                latitude=float(gps_data[1]),
-            )
-            parking = Parking(
-                empty_count=int(float(parking_data[0])),
-                gps=gps
-            )
+            if self.accel_line > len(self.accel_lines) - 1:
+                self.accel_line = 0
 
-            data_list.append({
-                "aggregated_data": AggregatedData(
-                    accelerometer=accelerometer,
-                    gps=gps,
-                    timestamp=datetime.now(),
-                    user_id=config.USER_ID,
-                ),
-                "parking_data": parking
-            })
-        
-        return data_list
+            if self.parking_line > len(self.parking_lines) - 1:
+                self.parking_line = 0
 
-    def stopReading(self):
-        for key in self.files:
-            if self.files[key]:
-                self.files[key].close()
+            split_gps = self.gps_lines[self.gps_line].split(',')
+            split_accel = self.accel_lines[self.accel_line].split(',')
+            split_parking = self.parking_lines[self.parking_line].split(',')
+
+            lat, long = split_gps
+            data.gps = Gps(long, lat)
+
+            x, y, z = split_accel
+            data.accelerometer = Accelerometer(x, y, z)
+
+            long, lat, empty_count = split_parking
+            data.parking = Parking(empty_count, Gps(long, lat))
+
+            self.gps_line += 1
+            self.accel_line += 1
+            self.parking_line += 1
+
+        return data
+
+    def startReading(self, *args, **kwargs):
+        """Метод повинен викликатись перед початком читання даних"""
+        self.reading = True
+        self.accel_line = 0
+        self.gps_line = 0
+        self.parking_line = 0
+
+    def stopReading(self, *args, **kwargs):
+        """Метод повинен викликатись для закінчення читання даних"""
+        self.reading = False
