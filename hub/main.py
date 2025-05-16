@@ -7,7 +7,6 @@ import paho.mqtt.client as mqtt
 import scipy
 
 from app.adapters.store_api_adapter import StoreApiAdapter
-from app.entities.agent_data import AgentData
 from app.entities.processed_agent_data import ProcessedAgentData
 from config import (
     STORE_API_BASE_URL,
@@ -39,12 +38,12 @@ app = FastAPI()
 
 
 @app.post("/agent_data/")
-async def process_and_save_agent_data(agent_data: AgentData):
+async def process_and_save_agent_data(agent_data: ProcessedAgentData):
     redis_client.lpush("agent_data", agent_data.model_dump_json())
     if redis_client.llen("agent_data") >= BATCH_SIZE:
         agent_data_batch: List[ProcessedAgentData] = []
         for _ in range(BATCH_SIZE):
-            agent_data = AgentData.model_validate_json(
+            agent_data = ProcessedAgentData.model_validate_json(
                 redis_client.lpop("agent_data")
             )
             agent_data_batch.append(agent_data)
@@ -53,13 +52,13 @@ async def process_and_save_agent_data(agent_data: AgentData):
         store_adapter.save_data(processed_data_batch=processed_data_batch)
     return {"status": "ok"}
 
-def process_agent_data(agent_data_batch: List[AgentData]):
+def process_agent_data(agent_data_batch: List[ProcessedAgentData]):
     processed_data_batch = []
     
-    z_values = list(map(lambda item: item.accelerometer.z, agent_data_batch))
+    z_values = list(map(lambda item: item.agent_data.accelerometer.z, agent_data_batch))
     bumps_indices, _ = scipy.signal.find_peaks(z_values, prominence=7000, width=3)
     bumps = list(map(
-        lambda i: agent_data_batch[i].gps,
+        lambda i: agent_data_batch[i].agent_data.gps,
         bumps_indices
     ))
         
@@ -97,17 +96,17 @@ def on_message(client, userdata, msg):
     try:
         payload: str = msg.payload.decode("utf-8")
         # Create ProcessedAgentData instance with the received data
-        agent_data = AgentData.model_validate_json(
+        agent_data = ProcessedAgentData.model_validate_json(
             payload, strict=True
         )
 
         redis_client.lpush(
             "agent_data", agent_data.model_dump_json()
         )
-        agent_data_batch: List[AgentData] = []
+        agent_data_batch: List[ProcessedAgentData] = []
         if redis_client.llen("agent_data") >= BATCH_SIZE:
             for _ in range(BATCH_SIZE):
-                agent_data = AgentData.model_validate_json(
+                agent_data = ProcessedAgentData.model_validate_json(
                     redis_client.lpop("agent_data")
                 )
                 agent_data_batch.append(agent_data)
