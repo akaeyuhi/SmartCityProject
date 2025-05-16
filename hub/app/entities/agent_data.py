@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ValidationInfo
 
 class AccelerometerData(BaseModel):
     x: float
@@ -22,19 +22,15 @@ class HumidityData(BaseModel):
     unit: str
 
 
-class VibrationData(BaseModel):
-    x: float
-    y: float
-    z: float
-    magnitude: float | None = None
+class VibrationData(AccelerometerData):
+    magnitude: float = None
 
     @field_validator('magnitude', mode='after')
-    def compute_magnitude(cls, v, values):
-        x = values.get('x', 0)
-        y = values.get('y', 0)
-        z = values.get('z', 0)
+    def compute_magnitude(cls, v, info: ValidationInfo):
+        x = info.data.get('x', 0)
+        y = info.data.get('y', 0)
+        z = info.data.get('z', 0)
         return (x**2 + y**2 + z**2) ** 0.5
-
 
 class LightData(BaseModel):
     illumination: float
@@ -43,7 +39,7 @@ class LightData(BaseModel):
 class AirQualityData(BaseModel):
     pm2_5: float
     pm10: float
-    aqi: int | None = None
+    aqi: int = None
 
 
 class AgentData(BaseModel):
