@@ -41,11 +41,16 @@ class FileDatasource:
     def read(self) -> AggregatedData:
         """Метод повертає дані отримані з датчиків"""
         data = AggregatedData(
-            Accelerometer(1, 2, 3),
-            Gps(4, 5),
-            Parking(25, Gps(4, 5)),
-            datetime.now(),
-            config.USER_ID,
+            accelerometer=Accelerometer(1, 2, 3),
+            gps=Gps(4, 5),
+            parking=Parking(25, Gps(4, 5)),
+            temperature=Temperature(-376, "C"),
+            humidity=Humidity(0, "%"),
+            vibration=Vibration(1, 2, 3),
+            light=Light(900000),
+            air_quality=AirQuality(-5, -5),
+            timestamp=datetime.now(),
+            user_id=config.USER_ID,
         )
 
         if self.reading == True:
