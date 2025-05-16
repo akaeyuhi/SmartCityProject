@@ -22,10 +22,7 @@ class HumidityData(BaseModel):
     unit: str
 
 
-class VibrationData(BaseModel):
-    x: float
-    y: float
-    z: float
+class VibrationData(AccelerometerData):
     magnitude: float | None = None
 
     @field_validator('magnitude', mode='after')
