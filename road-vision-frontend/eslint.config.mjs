@@ -23,11 +23,11 @@ export default [
     ignores: ['**/eslint.config.mjs'],
   },
   ...fixupConfigRules(
-    compat.extends(
-      'plugin:react/recommended',
-      'plugin:@typescript-eslint/recommended',
-      'plugin:prettier/recommended'
-    )
+      compat.extends(
+          'plugin:react/recommended',
+          'plugin:@typescript-eslint/recommended',
+          'plugin:prettier/recommended'
+      )
   ),
   {
     plugins: {
@@ -48,12 +48,23 @@ export default [
       sourceType: 'module',
 
       parserOptions: {
-        project: 'tsconfig.json',
+        projectService: ['./tsconfig.json', './tsconfig.node.json', './tsconfig.app.json',],
         tsconfigRootDir: './',
       },
     },
 
     rules: {
+      'prettier/prettier': [
+        'error',
+        {
+          "semi": true,
+          "tabWidth": 2,
+          "printWidth": 80,
+          "singleQuote": true,
+          "trailingComma": "es5"
+        }
+
+      ],
       '@typescript-eslint/interface-name-prefix': 'off',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
