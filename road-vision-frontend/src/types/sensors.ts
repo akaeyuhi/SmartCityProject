@@ -1,10 +1,31 @@
-export interface AccelerometerData { x: number; y: number; z: number; }
-export interface GpsData { latitude: number; longitude: number; }
-export interface TemperatureData { value: number; unit: 'C' | 'F'; }
-export interface HumidityData { value: number; unit: '%'; }
-export interface VibrationData extends AccelerometerData{ magnitude: number;}
-export interface LightData { illumination: number; }
-export interface AirQualityData { pm2_5: number; pm10: number; aqi: number; }
+export interface AccelerometerData {
+  x: number;
+  y: number;
+  z: number;
+}
+export interface GpsData {
+  latitude: number;
+  longitude: number;
+}
+export interface TemperatureData {
+  value: number;
+  unit: 'C' | 'F';
+}
+export interface HumidityData {
+  value: number;
+  unit: '%';
+}
+export interface VibrationData extends AccelerometerData {
+  magnitude: number;
+}
+export interface LightData {
+  illumination: number;
+}
+export interface AirQualityData {
+  pm2_5: number;
+  pm10: number;
+  aqi: number;
+}
 
 export interface AgentData {
   user_id: number;
@@ -15,7 +36,7 @@ export interface AgentData {
   vibration: VibrationData;
   light: LightData;
   air_quality: AirQualityData;
-  timestamp: string
+  timestamp: string;
 }
 
 export interface SensorPayload {

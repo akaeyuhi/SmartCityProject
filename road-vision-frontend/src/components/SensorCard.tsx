@@ -24,29 +24,33 @@ const statusStyles: Record<string, string> = {
   unknown: 'bg-gray-100 text-gray-800',
 };
 
-const SensorCard: React.FC<SensorCardProps> = ({ title, value, unit, status }) => {
-  const badgeClass = status ? statusStyles[status] || statusStyles['unknown'] : '';
+const SensorCard: React.FC<SensorCardProps> = ({
+  title,
+  value,
+  unit,
+  status,
+}) => {
+  const badgeClass = status
+    ? statusStyles[status] || statusStyles['unknown']
+    : '';
 
   return (
-      <div className="bg-white rounded-2xl shadow p-4 flex flex-col justify-between">
-        <div>
-          <h3 className="text-sm font-medium text-gray-500 uppercase">
-            {title}
-          </h3>
-          <p className="mt-2 text-2xl font-bold text-gray-900">
-            {value}{unit || ''}
-          </p>
-        </div>
-        {status && (
-            <span
-                className={
-                  `mt-4 inline-block px-3 py-1 text-xs font-semibold rounded-full ${badgeClass}`
-                }
-            >
+    <div className="bg-white rounded-2xl shadow p-4 flex flex-col justify-between">
+      <div>
+        <h3 className="text-sm font-medium text-gray-500 uppercase">{title}</h3>
+        <p className="mt-2 text-2xl font-bold text-gray-900">
+          {value}
+          {unit || ''}
+        </p>
+      </div>
+      {status && (
+        <span
+          className={`mt-4 inline-block px-3 py-1 text-xs font-semibold rounded-full ${badgeClass}`}
+        >
           {status}
         </span>
-        )}
-      </div>
+      )}
+    </div>
   );
 };
 

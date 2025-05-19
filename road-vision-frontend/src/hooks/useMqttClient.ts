@@ -9,10 +9,7 @@ interface UseMqttResult {
   error: Error | null;
 }
 
-export function useMqttClient(
-    brokerUrl: string,
-    topic: string
-): UseMqttResult {
+export function useMqttClient(brokerUrl: string, topic: string): UseMqttResult {
   const [client, setClient] = useState<MqttClient | null>(null);
   const [data, setData] = useState<SensorPayload[]>([]);
   const [error, setError] = useState<Error | null>(null);

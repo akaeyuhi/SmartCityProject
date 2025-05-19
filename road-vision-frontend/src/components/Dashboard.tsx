@@ -39,36 +39,66 @@ const Dashboard: React.FC = () => {
     return <div className="p-4">No data available yet...</div>;
   }
 
-  const { temperature, humidity, air_quality, light, vibration, } = latest.agent_data;
+  // eslint-disable-next-line camelcase
+  const { temperature, humidity, air_quality, light, vibration } =
+    latest.agent_data;
 
   // Конфігурація карток
   const cardConfigs = [
-    { title: 'Road State', value: latest.road_state, status: latest.road_state },
-    { title: 'Temperature', value: temperature.value, unit: temperature.unit, status: latest.temp_status },
-    { title: 'Humidity', value: humidity.value, unit: '%', status: latest.humidity_status },
-    { title: 'Vibration (mag)', value: vibration.magnitude.toFixed(2), status: latest.vibration_status },
-    { title: 'Illumination' + ' ', value: light.illumination, unit: 'lux', status: latest.light_status },
-    { title: 'Air Quality (AQI)', value: air_quality.aqi, status: latest.air_quality_status },
+    {
+      title: 'Road State',
+      value: latest.road_state,
+      status: latest.road_state,
+    },
+    {
+      title: 'Temperature',
+      value: temperature.value,
+      unit: temperature.unit,
+      status: latest.temp_status,
+    },
+    {
+      title: 'Humidity',
+      value: humidity.value,
+      unit: '%',
+      status: latest.humidity_status,
+    },
+    {
+      title: 'Vibration (mag)',
+      value: vibration.magnitude.toFixed(2),
+      status: latest.vibration_status,
+    },
+    {
+      title: 'Illumination ',
+      value: light.illumination,
+      unit: 'lux',
+      status: latest.light_status,
+    },
+    {
+      title: 'Air Quality (AQI)',
+      // eslint-disable-next-line camelcase
+      value: air_quality.aqi,
+      status: latest.air_quality_status,
+    },
   ];
 
   return (
-      <div className="p-4 grid grid-cols-1 gap-6">
-        <h1 className="text-2xl font-bold">IoT Road Vision Dashboard</h1>
+    <div className="p-4 grid grid-cols-1 gap-6">
+      <h1 className="text-2xl font-bold">IoT Road Vision Dashboard</h1>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {cardConfigs.map(({ title, value, unit, status }) => (
-              <SensorCard
-                  key={title}
-                  title={title}
-                  value={value}
-                  unit={unit}
-                  status={status}
-              />
-          ))}
-        </div>
-        <SensorChart data={dataHistory} />
-        <SensorTable data={dataHistory} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {cardConfigs.map(({ title, value, unit, status }) => (
+          <SensorCard
+            key={title}
+            title={title}
+            value={value}
+            unit={unit}
+            status={status}
+          />
+        ))}
       </div>
+      <SensorChart data={dataHistory} />
+      <SensorTable data={dataHistory} />
+    </div>
   );
 };
 
