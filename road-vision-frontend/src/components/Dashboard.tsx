@@ -15,7 +15,6 @@ const Dashboard: React.FC = () => {
   const bufferRef = useRef<SensorPayload[]>([]);
   const latest = dataHistory[0];
 
-  // Накопичуємо дані у буфер
   useEffect(() => {
     bufferRef.current = incomingData;
   }, [incomingData]);
@@ -24,7 +23,6 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const timer = setInterval(() => {
       if (bufferRef.current.length > 0) {
-        // Беремо останні 50 повідомлень
         const slice = bufferRef.current.slice(0, 50);
         setDataHistory(slice);
       }
@@ -49,7 +47,7 @@ const Dashboard: React.FC = () => {
     { title: 'Temperature', value: temperature.value, unit: temperature.unit, status: latest.temp_status },
     { title: 'Humidity', value: humidity.value, unit: '%', status: latest.humidity_status },
     { title: 'Vibration (mag)', value: vibration.magnitude.toFixed(2), status: latest.vibration_status },
-    { title: 'Illumination', value: light.light, unit: 'lux', status: latest.light_status },
+    { title: 'Illumination' + ' ', value: light.illumination, unit: 'lux', status: latest.light_status },
     { title: 'Air Quality (AQI)', value: air_quality.aqi, status: latest.air_quality_status },
   ];
 
